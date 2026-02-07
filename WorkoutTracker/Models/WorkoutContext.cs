@@ -6,6 +6,8 @@ namespace WorkoutTracker.Models
     { 
         public WorkoutContext(DbContextOptions<WorkoutContext> options) : base(options) { } 
 
-        public DbSet<Workout> Workouts { get; set; }
-    }
+        public DbSet<Workout> Workouts { get; set; } 
+
+        public DbSet<Exercise> Exercises { get; set; }
+    } 
 }

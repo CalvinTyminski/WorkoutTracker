@@ -13,5 +13,7 @@ namespace WorkoutTracker.Models
         public DateTime Date { get; set; } 
 
         public int DurationMinutes { get; set; }
+
+        public List<Exercise> Exercises { get; set; } = new List<Exercise>();
     }
 }

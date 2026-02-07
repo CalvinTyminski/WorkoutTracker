@@ -16,12 +16,10 @@ namespace WorkoutTracker.Models
         public int Reps { get; set; }
 
         [Required]
-        public double weight { get; set; }
+        public double Weight { get; set; }
 
         public int WorkoutId { get; set; } 
 
         public Workout? Workout { get; set; }
-
-        public List<Exercise> Exercises { get; set; } = new List<Exercise>();
     }
 }

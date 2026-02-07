@@ -9,16 +9,23 @@ using WorkoutTracker.Models;
 
 namespace WorkoutTracker.Controllers
 {
-    public class WorkoutsController : Controller
+    public class ExercisesController : Controller
     {
         private readonly WorkoutContext _context;
 
-        public WorkoutsController(WorkoutContext context)
+        public ExercisesController(WorkoutContext context)
         {
             _context = context;
         }
 
- 
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var workoutContext = _context.Exercises.Include(e => e.Workout);
+            return View(await workoutContext.ToListAsync());
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -26,38 +33,37 @@ namespace WorkoutTracker.Controllers
                 return NotFound();
             }
 
-            var workout = await _context.Workouts
-                .Include(w => w.Exercises)
+            var exercise = await _context.Exercises
+                .Include(e => e.Workout)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (workout == null)
+            if (exercise == null)
             {
                 return NotFound();
             }
 
-            return View(workout);
+            return View(exercise);
         }
 
-       
         [HttpGet]
-        public IActionResult Create()
+        public IActionResult Create(int workoutId)
         {
-            return View();
+            var exercise = new Exercise { WorkoutId = workoutId };
+            return View(exercise);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Date,DurationMinutes")] Workout workout)
+        public async Task<IActionResult> Create(Exercise exercise)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(workout);
+                _context.Add(exercise);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Details", "Workouts", new {id =exercise.WorkoutId});
             }
-            return View(workout);
+            return View(exercise);
         }
 
-       
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -66,20 +72,20 @@ namespace WorkoutTracker.Controllers
                 return NotFound();
             }
 
-            var workout = await _context.Workouts.FindAsync(id);
-            if (workout == null)
+            var exercise = await _context.Exercises.FindAsync(id);
+            if (exercise == null)
             {
                 return NotFound();
             }
-            return View(workout);
+            ViewData["WorkoutId"] = new SelectList(_context.Workouts, "Id", "Name", exercise.WorkoutId);
+            return View(exercise);
         }
 
-        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Date,DurationMinutes")] Workout workout)
+        public async Task<IActionResult> Edit(int id, Exercise exercise)
         {
-            if (id != workout.Id)
+            if (id != exercise.Id)
             {
                 return NotFound();
             }
@@ -88,12 +94,12 @@ namespace WorkoutTracker.Controllers
             {
                 try
                 {
-                    _context.Update(workout);
+                    _context.Update(exercise);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!WorkoutExists(workout.Id))
+                    if (!ExerciseExists(exercise.Id))
                     {
                         return NotFound();
                     }
@@ -102,12 +108,12 @@ namespace WorkoutTracker.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction(nameof(Index));
             }
-            return View(workout);
+            ViewData["WorkoutId"] = new SelectList(_context.Workouts, "Id", "Name", exercise.WorkoutId);
+            return View(exercise);
         }
 
-        
         [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -116,34 +122,34 @@ namespace WorkoutTracker.Controllers
                 return NotFound();
             }
 
-            var workout = await _context.Workouts
+            var exercise = await _context.Exercises
+                .Include(e => e.Workout)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (workout == null)
+            if (exercise == null)
             {
                 return NotFound();
             }
 
-            return View(workout);
+            return View(exercise);
         }
 
-      
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var workout = await _context.Workouts.FindAsync(id);
-            if (workout != null)
+            var exercise = await _context.Exercises.FindAsync(id);
+            if (exercise != null)
             {
-                _context.Workouts.Remove(workout);
+                _context.Exercises.Remove(exercise);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction("Index", "Home");
         }
 
-        private bool WorkoutExists(int id)
+        private bool ExerciseExists(int id)
         {
-            return _context.Workouts.Any(e => e.Id == id);
+            return _context.Exercises.Any(e => e.Id == id);
         }
     }
 }

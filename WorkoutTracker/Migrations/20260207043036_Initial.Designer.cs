@@ -12,7 +12,7 @@ using WorkoutTracker.Models;
 namespace WorkoutTracker.Migrations
 {
     [DbContext(typeof(WorkoutContext))]
-    [Migration("20260205013535_Initial")]
+    [Migration("20260207043036_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -24,6 +24,37 @@ namespace WorkoutTracker.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("WorkoutTracker.Models.Exercise", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Reps")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Sets")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Weight")
+                        .HasColumnType("float");
+
+                    b.Property<int>("WorkoutId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkoutId");
+
+                    b.ToTable("Exercises");
+                });
 
             modelBuilder.Entity("WorkoutTracker.Models.Workout", b =>
                 {
@@ -46,6 +77,22 @@ namespace WorkoutTracker.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Workouts");
+                });
+
+            modelBuilder.Entity("WorkoutTracker.Models.Exercise", b =>
+                {
+                    b.HasOne("WorkoutTracker.Models.Workout", "Workout")
+                        .WithMany("Exercises")
+                        .HasForeignKey("WorkoutId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Workout");
+                });
+
+            modelBuilder.Entity("WorkoutTracker.Models.Workout", b =>
+                {
+                    b.Navigation("Exercises");
                 });
 #pragma warning restore 612, 618
         }

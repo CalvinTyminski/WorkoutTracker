@@ -31,6 +31,32 @@
     </dl>
 </div>
 <div>
+    <a asp-controller="Exercises"asp-action="Create" asp-route-workoutId="@Model.Id" class="btn btn-success">Add Exercise</a>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
     <a asp-controller="Home" asp-action="Index">Back to List</a>
+</div> 
+<div>
+    <h5>Exercises</h5> 
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Sets</th>
+                <th>Reps</th>
+                <th>Weight</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var ex in Model.Exercises)
+            {
+                <tr>
+                    <td>@ex.Name</td>
+                    <td>@ex.Sets</td>
+                    <td>@ex.Reps</td>
+                    <td>@ex.Weight</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
