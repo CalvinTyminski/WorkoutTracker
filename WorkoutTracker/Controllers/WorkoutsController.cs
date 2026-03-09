@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WorkoutTracker.Models;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace WorkoutTracker.Controllers
 {
+    [Authorize]
     public class WorkoutsController : Controller
     {
         private readonly WorkoutContext _context;
@@ -48,6 +52,7 @@ namespace WorkoutTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Date,DurationMinutes")] Workout workout)
         {
+            workout.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (ModelState.IsValid)
             {
                 _context.Add(workout);

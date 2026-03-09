@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Security.Claims;
 using WorkoutTracker.Models;
 
 namespace WorkoutTracker.Controllers
@@ -15,7 +16,12 @@ namespace WorkoutTracker.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Workouts.ToListAsync());
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var workouts = await _context.Workouts
+                .Where(w => w.UserId == userId)
+                .ToListAsync();
+            return View(workouts);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
