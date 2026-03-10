@@ -16,6 +16,6 @@ namespace WorkoutTracker.Models
 
         public List<Exercise> Exercises { get; set; } = new List<Exercise>(); 
 
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
     }
 }

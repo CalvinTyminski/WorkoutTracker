@@ -29,10 +29,11 @@ namespace WorkoutTracker.Controllers
             {
                 return NotFound();
             }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var workout = await _context.Workouts
                 .Include(w => w.Exercises)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id && m.UserId == userId);
             if (workout == null)
             {
                 return NotFound();
@@ -48,21 +49,44 @@ namespace WorkoutTracker.Controllers
             return View();
         }
 
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("Id,Name,Date,DurationMinutes")] Workout workout)
+        //{
+        //    workout.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //    if (ModelState.IsValid)
+        //    {
+        //        _context.Add(workout);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction("Index", "Home");
+        //    }
+        //    return View(workout);
+        //}
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Date,DurationMinutes")] Workout workout)
+        public async Task<IActionResult> Create(Workout workout)
         {
-            workout.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+            {
+                return Content("User is not logged in");
+            }
+
+            workout.UserId = userId;
+
             if (ModelState.IsValid)
             {
                 _context.Add(workout);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index", "Home");
             }
+
             return View(workout);
         }
 
-       
+
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -82,34 +106,27 @@ namespace WorkoutTracker.Controllers
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Date,DurationMinutes")] Workout workout)
+        public async Task<IActionResult> Edit(int id, Workout workout)
         {
             if (id != workout.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            var existingWorkout = await _context.Workouts.FindAsync(id);
+
+            if (existingWorkout == null)
             {
-                try
-                {
-                    _context.Update(workout);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!WorkoutExists(workout.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction("Index", "Home");
+                return NotFound();
             }
-            return View(workout);
+
+            existingWorkout.Name = workout.Name;
+            existingWorkout.Date = workout.Date;
+            existingWorkout.DurationMinutes = workout.DurationMinutes;
+
+            await _context.SaveChangesAsync();
+                   
+            return RedirectToAction("Index", "Home");
         }
 
         

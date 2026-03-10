@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -6,6 +7,7 @@ using WorkoutTracker.Models;
 
 namespace WorkoutTracker.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly WorkoutContext _context;
@@ -16,7 +18,7 @@ namespace WorkoutTracker.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
 
             var workouts = await _context.Workouts
                 .Where(w => w.UserId == userId)
