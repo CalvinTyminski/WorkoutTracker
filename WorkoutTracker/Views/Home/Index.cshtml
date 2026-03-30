@@ -1,4 +1,5 @@
-﻿@model IEnumerable<WorkoutTracker.Models.Workout>
+﻿@using System.Text.Json;
+@model IEnumerable<WorkoutTracker.Models.Workout>
 
 @{
     ViewData["Title"] = "Index";
@@ -8,6 +9,8 @@
 
 <p>
     <a asp-controller="Workouts" asp-action="Create">Create a New Workout</a>
+</p>
+<p>
     <a asp-controller="Home" asp-action="Logout">Logout</a>
 </p>
 <table class="table">
@@ -46,3 +49,55 @@
 }
     </tbody>
 </table>
+
+<h2>Fitness Analytics</h2>
+
+<h3>Volume Progress</h3>
+<canvas id="volumeChart"></canvas>
+
+<h3>Workout Duration</h3>
+<canvas id="durationChart"></canvas>
+
+<h3>Personal Records</h3>
+<ul>
+    @if (ViewBag.PersonalRecords != null)
+    {
+        foreach (var personalRecords in ViewBag.PersonalRecords)
+        {
+            <li>@personalRecords.Exercise - @personalRecords.MaxWeight lbs</li>
+        }
+    }
+</ul>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const volumeLabels = @Html.Raw(Json.Serialize(ViewBag.Dates ?? new List<string>()));
+    const volumeData = @Html.Raw(Json.Serialize(ViewBag.Volume ?? new List<double>()));
+
+    new Chart(document.getElementById('volumeChart'), {
+    type: 'line',
+    data: {
+    labels: volumeLabels,
+    datasets: [{
+    label: 'Total Volume',
+    data: volumeData,
+    borderWidth: 2
+    }]
+    }
+    });
+
+    const durationLabels = @Html.Raw(Json.Serialize(ViewBag.DurationDates ?? new List<string>()));
+    const durationData = @Html.Raw(Json.Serialize(ViewBag.Duration ?? new List<double>()));
+
+    new Chart(document.getElementById('durationChart'), {
+    type: 'bar',
+    data: {
+    labels: durationLabels,
+    datasets: [{
+    label: 'Minutes',
+    data: durationData
+    }]
+    }
+    });
+</script>
