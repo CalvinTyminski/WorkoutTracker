@@ -25,7 +25,49 @@ namespace WorkoutTracker.Controllers
 
             var workouts = await _context.Workouts
                 .Where(w => w.UserId == userId)
+                .Include(w => w.Exercises)
                 .ToListAsync();
+
+            var volumeData = workouts
+                .GroupBy(w => w.Date.Date)
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    Volume = g.SelectMany(w => w.Exercises)
+                .Sum(e => e.Sets * e.Reps * e.Weight)
+                })
+                .OrderBy(d => d.Date)
+                .ToList();
+
+            var durationData = workouts
+                .GroupBy(w => w.Date.Date)
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    Duration = g.Sum(w => w.DurationMinutes)
+                })
+                .OrderBy(d => d.Date)
+                .ToList();
+
+            var personalRecords = workouts
+                .SelectMany(w => w.Exercises)
+                .GroupBy(e => e.Name)
+                .Select(g => new
+                {
+                    Exercise = g.Key,
+                    MaxWeight = g.Max(w => w.Weight)
+                })
+                .ToList();
+
+            ViewBag.Workouts = workouts;
+
+            ViewBag.Dates = volumeData.Select(x => x.Date.ToString("yyyy-MM-dd")).ToList();
+            ViewBag.Volume = volumeData.Select(x => x.Volume).ToList();
+            ViewBag.DurationDates = durationData.Select(x => x.Date.ToString("yyyy-MM-dd")).ToList();
+            ViewBag.Duration = durationData.Select(x => x.Duration).ToList();
+            ViewBag.PersonalRecords = personalRecords;
+
+
             return View(workouts);
         }
 
