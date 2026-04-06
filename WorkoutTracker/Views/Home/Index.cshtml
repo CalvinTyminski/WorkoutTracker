@@ -10,15 +10,18 @@
 <p>
     <a asp-controller="Workouts" asp-action="Create">Create a New Workout</a>
 </p>
-<p>
-    <a asp-controller="Home" asp-action="Logout">Logout</a>
-</p>
 <div style="margin-bottom: 15px;">
-    <a asp-action="Index" asp-route-filter="week" 
-    class="btn @(ViewBag.CurrentFilter == "week"? "btn-primary": "btn-outline-primary")">This Week</a>
+    <a asp-controller="Home" asp-action="Index"
+           asp-route-filter="week" asp-route-page="1"
+           class="btn @(ViewBag.CurrentFilter == "week" ? "btn-primary" : "btn-outline-primary")">
+        This Week
+    </a>
 
-    <a asp-action="Index" asp-route-filter="all"
-    class="btn @(ViewBag.CurrentFilter == "all"? "btn-primary": "btn-outline-primary")">All Time</a>
+    <a asp-controller="Home" asp-action="Index"
+           asp-route-filter="all" asp-route-page="1"
+           class="btn @(ViewBag.CurrentFilter == "all" ? "btn-primary" : "btn-outline-primary")">
+        All Time
+    </a>
 </div>
 <table class="table">
     <thead>
@@ -56,6 +59,44 @@
 }
     </tbody>
 </table>
+<div style="margin-top:20px;">
+
+    @if ((int)ViewBag.CurrentPage > 1)
+    {
+        <a asp-controller="Home" asp-action="Index"
+               asp-route-page="@(ViewBag.CurrentPage - 1)"
+               asp-route-filter="@ViewBag.CurrentFilter"
+               class="btn btn-outline-secondary me-1">
+            Previous
+        </a>
+    }
+
+    @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
+    {
+        <a asp-controller="Home" asp-action="Index"
+               asp-route-page="@i"
+               asp-route-filter="@ViewBag.CurrentFilter"
+               class="btn me-1 @(ViewBag.CurrentPage == i ? "btn-primary" : "btn-outline-primary")">
+            @i
+        </a>
+    }
+
+    @if ((int)ViewBag.CurrentPage < (int)ViewBag.TotalPages)
+    {
+        <a asp-controller="Home" asp-action="Index"
+               asp-route-page="@(ViewBag.CurrentPage + 1)"
+               asp-route-filter="@ViewBag.CurrentFilter"
+               class="btn btn-outline-secondary">
+            Next
+        </a>
+    }
+
+</div>
+<p>
+    Showing
+    <strong>@ViewBag.CurrentFilter</strong> workouts —
+    Page @ViewBag.CurrentPage of @ViewBag.TotalPages
+</p>
 
 <h2>Fitness Analytics</h2>
 

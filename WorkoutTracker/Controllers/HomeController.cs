@@ -19,8 +19,9 @@ namespace WorkoutTracker.Controllers
             _context = context;
             _signInManager = signInManager;
         }
-        public async Task<IActionResult> Index(string filter = "week")
+        public async Task<IActionResult> Index(string filter = "week", int page = 1)
         {
+            int pageSize = 5;
             var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
 
             IQueryable<Workout> query = _context.Workouts
@@ -36,9 +37,17 @@ namespace WorkoutTracker.Controllers
                 query = query.Where(w => w.Date >= startOfWeek && w.Date <= today);
             }
 
-            var workouts = await query.ToListAsync();
+            int totalWorkouts = await query.CountAsync();
 
-            var volumeData = workouts
+            var filteredWorkouts = await query.ToListAsync();
+
+            var workouts = filteredWorkouts
+                .OrderByDescending(w => w.Date)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var volumeData = filteredWorkouts
                 .GroupBy(w => w.Date.Date)
                 .Select(g => new
                 {
@@ -49,7 +58,7 @@ namespace WorkoutTracker.Controllers
                 .OrderBy(d => d.Date)
                 .ToList();
 
-            var durationData = workouts
+            var durationData = filteredWorkouts
                 .GroupBy(w => w.Date.Date)
                 .Select(g => new
                 {
@@ -75,13 +84,15 @@ namespace WorkoutTracker.Controllers
                 })
                 .ToList();
 
-            ViewBag.Workouts = workouts;
+           
 
             ViewBag.Dates = volumeData.Select(x => x.Date.ToString("yyyy-MM-dd")).ToList();
             ViewBag.Volume = volumeData.Select(x => x.Volume).ToList();
             ViewBag.DurationDates = durationData.Select(x => x.Date.ToString("yyyy-MM-dd")).ToList();
             ViewBag.Duration = durationData.Select(x => x.Duration).ToList();
             ViewBag.PersonalRecords = personalRecords;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalWorkouts / pageSize);
             ViewBag.CurrentFilter = filter;
 
 
