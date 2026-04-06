@@ -4,148 +4,165 @@
 @{
     ViewData["Title"] = "Index";
 }
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Workout Dashboard</h2>
 
-<h1>Workout Tracker and Planner</h1>
-
-<p>
-    <a asp-controller="Workouts" asp-action="Create">Create a New Workout</a>
-</p>
-<div style="margin-bottom: 15px;">
-    <a asp-controller="Home" asp-action="Index"
-           asp-route-filter="week" asp-route-page="1"
-           class="btn @(ViewBag.CurrentFilter == "week" ? "btn-primary" : "btn-outline-primary")">
-        This Week
-    </a>
-
-    <a asp-controller="Home" asp-action="Index"
-           asp-route-filter="all" asp-route-page="1"
-           class="btn @(ViewBag.CurrentFilter == "all" ? "btn-primary" : "btn-outline-primary")">
-        All Time
-    </a>
-</div>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Date)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DurationMinutes)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Date)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DurationMinutes)
-            </td>
-            <td>
-                <a asp-controller="Workouts" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-controller="Workouts" asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-controller="Workouts" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
-<div style="margin-top:20px;">
-
-    @if ((int)ViewBag.CurrentPage > 1)
-    {
-        <a asp-controller="Home" asp-action="Index"
-               asp-route-page="@(ViewBag.CurrentPage - 1)"
-               asp-route-filter="@ViewBag.CurrentFilter"
-               class="btn btn-outline-secondary me-1">
-            Previous
+        <a asp-controller="Workouts" asp-action="Create" class="btn btn-success">
+            New Workout
         </a>
-    }
-
-    @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
-    {
+    </div>
+    <div class="mb-4 btn-group" style="margin-bottom: 15px;">
         <a asp-controller="Home" asp-action="Index"
-               asp-route-page="@i"
-               asp-route-filter="@ViewBag.CurrentFilter"
-               class="btn me-1 @(ViewBag.CurrentPage == i ? "btn-primary" : "btn-outline-primary")">
-            @i
+               asp-route-filter="week" asp-route-page="1"
+               class="btn @(ViewBag.CurrentFilter == "week" ? "btn-primary" : "btn-outline-primary")">
+            This Week
         </a>
-    }
 
-    @if ((int)ViewBag.CurrentPage < (int)ViewBag.TotalPages)
-    {
         <a asp-controller="Home" asp-action="Index"
-               asp-route-page="@(ViewBag.CurrentPage + 1)"
-               asp-route-filter="@ViewBag.CurrentFilter"
-               class="btn btn-outline-secondary">
-            Next
+               asp-route-filter="all" asp-route-page="1"
+               class="btn @(ViewBag.CurrentFilter == "all" ? "btn-primary" : "btn-outline-primary")">
+            All Time
         </a>
-    }
+    </div>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Your Workouts</h5>
 
-</div>
-<p>
-    Showing
-    <strong>@ViewBag.CurrentFilter</strong> workouts —
-    Page @ViewBag.CurrentPage of @ViewBag.TotalPages
-</p>
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Duration</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@item.Name</td>
+                            <td>@item.Date.ToShortDateString()</td>
+                            <td>@item.DurationMinutes min</td>
+                            <td>
+                                <a asp-controller="Workouts" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a asp-controller="Workouts" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Details</a>
+                                <a asp-controller="Workouts" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center mb-4">
 
-<h2>Fitness Analytics</h2>
-
-<h3>Volume Progress</h3>
-<canvas id="volumeChart"></canvas>
-
-<h3>Workout Duration</h3>
-<canvas id="durationChart"></canvas>
-
-<h3>Personal Records</h3>
-<ul>
-    @if (ViewBag.PersonalRecords != null)
-    {
-        foreach (var personalRecords in ViewBag.PersonalRecords)
+        @if ((int)ViewBag.CurrentPage > 1)
         {
-            <li>@personalRecords.Exercise - @personalRecords.MaxWeight lbs</li>
+            <a asp-controller="Home" asp-action="Index"
+                   asp-route-page="@(ViewBag.CurrentPage - 1)"
+                   asp-route-filter="@ViewBag.CurrentFilter"
+                   class="btn btn-outline-secondary me-1">
+                Previous
+            </a>
         }
-    }
-</ul>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
+        {
+            <a asp-controller="Home" asp-action="Index"
+                   asp-route-page="@i"
+                   asp-route-filter="@ViewBag.CurrentFilter"
+                   class="btn me-1 @(ViewBag.CurrentPage == i ? "btn-primary" : "btn-outline-primary")">
+                @i
+            </a>
+        }
 
-<script>
-    const volumeLabels = @Html.Raw(Json.Serialize(ViewBag.Dates ?? new List<string>()));
-    const volumeData = @Html.Raw(Json.Serialize(ViewBag.Volume ?? new List<double>()));
+        @if ((int)ViewBag.CurrentPage < (int)ViewBag.TotalPages)
+        {
+            <a asp-controller="Home" asp-action="Index"
+                   asp-route-page="@(ViewBag.CurrentPage + 1)"
+                   asp-route-filter="@ViewBag.CurrentFilter"
+                   class="btn btn-outline-secondary">
+                Next
+            </a>
+        }
 
-    new Chart(document.getElementById('volumeChart'), {
-    type: 'line',
-    data: {
-    labels: volumeLabels,
-    datasets: [{
-    label: 'Total Volume',
-    data: volumeData,
-    borderWidth: 2
-    }]
-    }
-    });
+    </div>
+    <p>
+        Showing
+        <strong>@ViewBag.CurrentFilter</strong> workouts —
+        Page @ViewBag.CurrentPage of @ViewBag.TotalPages
+    </p>
 
-    const durationLabels = @Html.Raw(Json.Serialize(ViewBag.DurationDates ?? new List<string>()));
-    const durationData = @Html.Raw(Json.Serialize(ViewBag.Duration ?? new List<double>()));
+    <h2>Fitness Analytics</h2>
 
-    new Chart(document.getElementById('durationChart'), {
-    type: 'bar',
-    data: {
-    labels: durationLabels,
-    datasets: [{
-    label: 'Minutes',
-    data: durationData
-    }]
-    }
-    });
-</script>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Volume Progress</h5>
+                    <canvas id="volumeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Workout Duration</h5>
+                    <canvas id="durationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Personal Records</h5>
+            <ul class="list-group list-group-flush">
+                @foreach (var pr in ViewBag.PersonalRecords)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@pr.Exercise</span>
+                        <strong>@pr.MaxWeight lbs</strong>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const volumeLabels = @Html.Raw(Json.Serialize(ViewBag.Dates ?? new List<string>()));
+        const volumeData = @Html.Raw(Json.Serialize(ViewBag.Volume ?? new List<double>()));
+
+        new Chart(document.getElementById('volumeChart'), {
+        type: 'line',
+        data: {
+        labels: volumeLabels,
+        datasets: [{
+        label: 'Total Volume',
+        data: volumeData,
+        borderWidth: 2
+        }]
+        }
+        });
+
+        const durationLabels = @Html.Raw(Json.Serialize(ViewBag.DurationDates ?? new List<string>()));
+        const durationData = @Html.Raw(Json.Serialize(ViewBag.Duration ?? new List<double>()));
+
+        new Chart(document.getElementById('durationChart'), {
+        type: 'bar',
+        data: {
+        labels: durationLabels,
+        datasets: [{
+        label: 'Minutes',
+        data: durationData
+        }]
+        }
+        });
+    </script>
+</div>
