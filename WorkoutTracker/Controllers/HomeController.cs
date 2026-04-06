@@ -23,8 +23,14 @@ namespace WorkoutTracker.Controllers
         {
             var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
 
+            var today = DateTime.Today;
+            int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+            var startOfWeek = today.AddDays(-diff);
+
             var workouts = await _context.Workouts
-                .Where(w => w.UserId == userId)
+                .Where(w => w.UserId == userId
+                && w.Date >= startOfWeek 
+                && w.Date <= today)
                 .Include(w => w.Exercises)
                 .ToListAsync();
 
@@ -49,7 +55,13 @@ namespace WorkoutTracker.Controllers
                 .OrderBy(d => d.Date)
                 .ToList();
 
-            var personalRecords = workouts
+            var allWorkouts = await _context.Workouts
+                .Where(w => w.UserId == userId)
+                .Include(w => w.Exercises)
+                .ToListAsync();
+
+
+            var personalRecords = allWorkouts
                 .SelectMany(w => w.Exercises)
                 .GroupBy(e => e.Name)
                 .Select(g => new
