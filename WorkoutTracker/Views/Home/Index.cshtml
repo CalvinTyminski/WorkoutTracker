@@ -13,7 +13,13 @@
 <p>
     <a asp-controller="Home" asp-action="Logout">Logout</a>
 </p>
-<h2>Recent Workouts</h2>
+<div style="margin-bottom: 15px;">
+    <a asp-action="Index" asp-route-filter="week" 
+    class="btn @(ViewBag.CurrentFilter == "week"? "btn-primary": "btn-outline-primary")">This Week</a>
+
+    <a asp-action="Index" asp-route-filter="all"
+    class="btn @(ViewBag.CurrentFilter == "all"? "btn-primary": "btn-outline-primary")">All Time</a>
+</div>
 <table class="table">
     <thead>
         <tr>

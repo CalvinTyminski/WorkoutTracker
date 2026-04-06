@@ -19,20 +19,24 @@ namespace WorkoutTracker.Controllers
             _context = context;
             _signInManager = signInManager;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string filter = "week")
         {
             var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
 
-            var today = DateTime.Today;
-            int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
-            var startOfWeek = today.AddDays(-diff);
+            IQueryable<Workout> query = _context.Workouts
+                .Where(w => w.UserId == userId)
+                .Include(w => w.Exercises);
 
-            var workouts = await _context.Workouts
-                .Where(w => w.UserId == userId
-                && w.Date >= startOfWeek 
-                && w.Date <= today)
-                .Include(w => w.Exercises)
-                .ToListAsync();
+            if (filter == "week")
+            {
+                var today = DateTime.Today;
+                int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                var startOfWeek = today.AddDays(-diff);
+
+                query = query.Where(w => w.Date >= startOfWeek && w.Date <= today);
+            }
+
+            var workouts = await query.ToListAsync();
 
             var volumeData = workouts
                 .GroupBy(w => w.Date.Date)
@@ -78,6 +82,7 @@ namespace WorkoutTracker.Controllers
             ViewBag.DurationDates = durationData.Select(x => x.Date.ToString("yyyy-MM-dd")).ToList();
             ViewBag.Duration = durationData.Select(x => x.Duration).ToList();
             ViewBag.PersonalRecords = personalRecords;
+            ViewBag.CurrentFilter = filter;
 
 
             return View(workouts);
